@@ -11,7 +11,13 @@
 |
 */
 
-Route::get('/', 'PagesController@root')->name('root');
+//我们希望用户一进来就能看的商品列表，因此让首页直接跳转到商品页面，记得删除原有的首页路由：
+//Route::get('/', 'PagesController@root')->name('root');
+Route::redirect('/', '/products')->name('root');
+Route::get('products', 'ProductsController@index')->name('products.index');
+
+
+
 Auth::routes();
 
 Route::group(['middleware' => 'auth'], function() {
