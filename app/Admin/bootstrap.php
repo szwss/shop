@@ -18,4 +18,4 @@
  *
  */
 
-Encore\Admin\Form::forget(['map', 'editor']);
+Encore\Admin\Form::forget(['map']);//20180708 , 'editor'

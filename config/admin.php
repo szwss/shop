@@ -127,7 +127,7 @@ return [
      * 页面风格
      * @see https://adminlte.io/docs/2.4/layout
      */
-    'skin' => 'skin-blue-light',
+    'skin' => 'skin-red',
 
     /*
     |---------------------------------------------------------|
