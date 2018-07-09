@@ -53,7 +53,7 @@ body {
 }
 
 //products-index-page
-.products-index-page {
+.products-index-page  , .products-favorites-page {
   /*分页组件与商品列表有些许的不对齐，调整一下：*/
   .pagination {
     margin-right: 5px;
@@ -116,7 +116,7 @@ body {
 }
 
 
-.products-show-page {
+.products-show-page{
   .cover {
     width: 100%;
     border: solid 1px #eee;
