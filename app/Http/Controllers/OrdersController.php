@@ -11,6 +11,8 @@ use App\Models\UserAddress;
 use App\Models\Order;
 use Carbon\Carbon;
 
+
+use App\Jobs\CloseOrder;
 class OrdersController extends Controller
 {
     public function store(OrderRequest $request)
@@ -68,6 +70,9 @@ class OrdersController extends Controller
 
             return $order;
         });
+
+        //关闭未支付订单 触发任务
+        $this->dispatch(new CloseOrder($order, config('app.order_ttl')));
 
         return $order;
     }
