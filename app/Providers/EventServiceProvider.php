@@ -8,6 +8,11 @@ use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvi
 use App\Listeners\RegisteredListener;
 use Illuminate\Auth\Events\Registered;
 
+use App\Events\OrderPaid;
+use App\Listeners\UpdateProductSoldCount;
+
+use App\Listeners\SendOrderPaidMail;
+
 class EventServiceProvider extends ServiceProvider
 {
     /**
@@ -21,6 +26,11 @@ class EventServiceProvider extends ServiceProvider
         ],
         Registered::class => [
             RegisteredListener::class,
+        ],
+
+        OrderPaid::class => [
+            UpdateProductSoldCount::class,//关联事件和监听器---订单支付增加销量
+            SendOrderPaidMail::class,//关联事件和监听器---订单支付发送邮件
         ],
     ];
 
