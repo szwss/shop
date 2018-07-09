@@ -38,7 +38,7 @@
                                         <a href="{{ route('products.show', ['product' => $product->id]) }}">{{ $product->title }}</a>
                                     </div>
 
-                                    
+
                                     <div class="bottom">
                                         <div class="sold_count">销量 <span>{{ $product->sold_count }}笔</span></div>
                                         <div class="review_count">评价 <span>{{ $product->review_count }}</span></div>
