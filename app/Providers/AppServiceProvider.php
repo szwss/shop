@@ -31,7 +31,7 @@ class AppServiceProvider extends ServiceProvider
 //            $config = config('pay.alipay');
             //接下来我们把这两个回调地址配置到支付宝的支付实例里：
             $config               = config('pay.alipay');
-            $config['notify_url'] = 'http://requestbin.fullcontact.com/17ihk2x1';//route('payment.alipay.notify')
+            $config['notify_url'] = route('payment.alipay.notify');//'http://requestbin.fullcontact.com/17ihk2x1'
             $config['return_url'] = route('payment.alipay.return');
 
             // 判断当前项目运行环境是否为线上环境
