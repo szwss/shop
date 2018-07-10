@@ -92,6 +92,7 @@ class OrdersController extends Controller
                 // 禁用删除和编辑按钮
                 $actions->disableDelete();
                 $actions->disableEdit();
+                $actions->append('<a class="btn btn-xs btn-primary" href="'.route('admin.orders.show', [$actions->getKey()]).'">查看</a>');
             });
             $grid->tools(function ($tools) {
                 // 禁用批量删除按钮
@@ -115,6 +116,19 @@ class OrdersController extends Controller
 
             $form->display('created_at', 'Created At');
             $form->display('updated_at', 'Updated At');
+        });
+    }
+
+    /*
+     * 由于订单信息比较多，Laravel-Admin 的表单形式不能很好地满足需求，因此这里我们采用自定义页面的方式来展示订单
+     * */
+
+    public function show(Order $order)
+    {
+        return Admin::content(function (Content $content) use ($order) {
+            $content->header('查看订单');
+            // body 方法可以接受 Laravel 的视图作为参数
+            $content->body(view('admin.orders.show', ['order' => $order]));
         });
     }
 }
