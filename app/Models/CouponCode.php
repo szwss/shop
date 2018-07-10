@@ -61,7 +61,6 @@ class CouponCode extends Model
 //
 //        return $str.'减'.$this->value;
 
-
         $str = '';
 
         if ($this->min_amount > 0) {
