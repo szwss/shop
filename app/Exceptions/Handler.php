@@ -14,6 +14,9 @@ class Handler extends ExceptionHandler
      */
     protected $dontReport = [
         InvalidRequestException::class,
+        //由于这个异常属于用户触发的业务异常，因此不需要记录在日志里
+        //把它配到 ExceptionHandler 的 $dontReport 属性里：
+        CouponCodeUnavailableException::class,
     ];
 
     /**
