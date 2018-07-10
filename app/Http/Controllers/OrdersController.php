@@ -23,6 +23,10 @@ use App\Http\Requests\SendReviewRequest;
 use App\Events\OrderReviewd;
 
 use App\Http\Requests\ApplyRefundRequest;
+
+use App\Exceptions\InternalException;
+
+use App\Http\Requests\Admin\HandleRefundRequest;
 class OrdersController extends Controller
 {
     // 利用 Laravel 的自动解析功能注入 CartService 类
@@ -32,68 +36,6 @@ class OrdersController extends Controller
         $address = UserAddress::find($request->input('address_id'));
 
         return $orderService->store($user, $address, $request->input('remark'), $request->input('items'));
-
-//
-//        $user  = $request->user();
-//        // 开启一个数据库事务
-//        $order = \DB::transaction(function () use ($user, $request, $cartService) {
-//            $address = UserAddress::find($request->input('address_id'));
-//            // 更新此地址的最后使用时间
-//            $address->update(['last_used_at' => Carbon::now()]);
-//            // 创建一个订单
-//            $order   = new Order([
-//                'address'      => [ // 将地址信息放入订单中
-//                    'address'       => $address->full_address,
-//                    'zip'           => $address->zip,
-//                    'contact_name'  => $address->contact_name,
-//                    'contact_phone' => $address->contact_phone,
-//                ],
-//                'remark'       => $request->input('remark'),
-//                'total_amount' => 0,
-//            ]);
-//            // 订单关联到当前用户
-//            $order->user()->associate($user);
-//            // 写入数据库
-//            $order->save();
-//
-//            $totalAmount = 0;
-//            $items       = $request->input('items');
-//            // 遍历用户提交的 SKU
-//            foreach ($items as $data) {
-//                $sku  = ProductSku::find($data['sku_id']);
-//                // 创建一个 OrderItem 并直接与当前订单关联
-//                $item = $order->items()->make([
-//                    'amount' => $data['amount'],
-//                    'price'  => $sku->price,
-//                ]);
-//                $item->product()->associate($sku->product_id);
-//                $item->productSku()->associate($sku);
-//                $item->save();
-//                $totalAmount += $sku->price * $data['amount'];
-//
-//                $totalAmount += $sku->price * $data['amount'];
-//                if ($sku->decreaseStock($data['amount']) <= 0) {
-//                    throw new InvalidRequestException('该商品库存不足');
-//                }
-//
-//            }
-//
-//            // 更新订单总金额
-//            $order->update(['total_amount' => $totalAmount]);
-//
-//            // 将下单的商品从购物车中移除
-////            $skuIds = collect($request->input('items'))->pluck('sku_id');
-////            $user->cartItems()->whereIn('product_sku_id', $skuIds)->delete();
-//            $skuIds = collect($request->input('items'))->pluck('sku_id')->all();
-//            $cartService->remove($skuIds);
-//
-//            return $order;
-//        });
-//
-//        //关闭未支付订单 触发任务
-//        $this->dispatch(new CloseOrder($order, config('app.order_ttl')));
-//
-//        return $order;
     }
 
     public function index(Request $request)
@@ -214,4 +156,63 @@ class OrdersController extends Controller
 
         return $order;
     }
+
+    public function handleRefund(Order $order, HandleRefundRequest $request)
+    {
+        if ($order->refund_status !== Order::REFUND_STATUS_APPLIED) {
+            throw new InvalidRequestException('订单状态不正确');
+        }
+        if ($request->input('agree')) {
+            // 调用退款逻辑
+            $this->_refundOrder($order);
+        } else {
+
+        }
+
+        return $order;
+    }
+    protected function _refundOrder(Order $order)
+    {
+        // 判断该订单的支付方式
+        switch ($order->payment_method) {
+            case 'wechat':
+                // 微信的先留空
+                // todo
+                break;
+            case 'alipay':
+                // 用我们刚刚写的方法来生成一个退款订单号
+                $refundNo = Order::getAvailableRefundNo();
+                // 调用支付宝支付实例的 refund 方法
+                $ret = app('alipay')->refund([
+                    'out_trade_no' => $order->no, // 之前的订单流水号
+                    'refund_amount' => $order->total_amount, // 退款金额，单位元
+                    'out_request_no' => $refundNo, // 退款订单号
+                ]);
+                // 根据支付宝的文档，如果返回值里有 sub_code 字段说明退款失败
+                if ($ret->sub_code) {
+                    // 将退款失败的保存存入 extra 字段
+                    $extra = $order->extra;
+                    $extra['refund_failed_code'] = $ret->sub_code;
+                    // 将订单的退款状态标记为退款失败
+                    $order->update([
+                        'refund_no' => $refundNo,
+                        'refund_status' => Order::REFUND_STATUS_FAILED,
+                        'extra' => $extra,
+                    ]);
+                } else {
+                    // 将订单的退款状态标记为退款成功并保存退款订单号
+                    $order->update([
+                        'refund_no' => $refundNo,
+                        'refund_status' => Order::REFUND_STATUS_SUCCESS,
+                    ]);
+                }
+                break;
+            default:
+                // 原则上不可能出现，这个只是为了代码健壮性
+                throw new InternalException('未知订单支付方式：'.$order->payment_method);
+                break;
+        }
+    }
 }
+
+
