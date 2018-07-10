@@ -13,6 +13,9 @@ use App\Listeners\UpdateProductSoldCount;
 
 use App\Listeners\SendOrderPaidMail;
 
+use App\Events\OrderReviewd;
+use App\Listeners\UpdateProductRating;
+
 class EventServiceProvider extends ServiceProvider
 {
     /**
@@ -31,6 +34,10 @@ class EventServiceProvider extends ServiceProvider
         OrderPaid::class => [
             UpdateProductSoldCount::class,//关联事件和监听器---订单支付增加销量
             SendOrderPaidMail::class,//关联事件和监听器---订单支付发送邮件
+        ],
+
+        OrderReviewd::class => [
+            UpdateProductRating::class,//更新产品评分
         ],
     ];
 
