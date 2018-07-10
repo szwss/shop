@@ -8,7 +8,7 @@ use App\Models\CouponCode;
 use Carbon\Carbon;
 class CouponCodesController extends Controller
 {
-    public function show($code)
+    public function show($code, Request $request)
     {
         // 判断优惠券是否存在
         if (!$record = CouponCode::where('code', $code)->first()) {
@@ -35,8 +35,8 @@ class CouponCodesController extends Controller
         /*
          * 把之前校验的代码修改成调用 checkAvailable() 方法：
          * */
-        $record->checkAvailable();
-
+//        $record->checkAvailable();
+        $record->checkAvailable($request->user());//由于我们修改了参数，因此需要修改调用这方法的地方：
         return $record;
     }
 }
