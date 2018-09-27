@@ -2,6 +2,10 @@
 
 use Faker\Generator as Faker;
 
+use App\Models\CouponCode;
+use App\Models\Order;
+use App\Models\User;
+
 $factory->define(App\Models\Order::class, function (Faker $faker) {
 
     // 随机取一个用户

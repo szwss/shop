@@ -38,9 +38,9 @@ class EmailVerificationController extends Controller
         // 将指定的 key 从缓存中删除，由于已经完成了验证，这个缓存就没有必要继续保留。
         Cache::forget('email_verification_'.$email);
         // 最关键的，要把对应用户的 `email_verified` 字段改为 `true`。
-//        $user->update(['email_verified' => true]);//不会生效？
-        $user->email_verified = true;//20180708教程bug,没有保存，不会生效？
-        $user->save();//20180708教程bug,没有保存，不会生效？
+        $user->update(['email_verified' => true]);//不会生效？
+//        $user->email_verified = true;//20180708教程bug,没有保存，不会生效？20180714发现是model中fillable（允许批量复制的字段） 中的email_verified 多了一个空格。
+//        $user->save();//20180708教程bug,没有保存，不会生效？
 
         // 最后告知用户邮箱验证成功。
         return view('pages.success', ['msg' => '邮箱验证成功']);

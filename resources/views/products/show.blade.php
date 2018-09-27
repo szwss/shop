@@ -165,6 +165,10 @@
                             // http 状态码为 401 代表用户未登陆
                             swal('请先登录', '', 'error');
 
+                        } else if (error.response.status === 400) {//20180714添加
+                            // http 状态码为 400 代表用户未验证邮箱
+//                            console.log(error.response.data.msg);
+                            swal(error.response.data.msg, '', 'error');
                         } else if (error.response.status === 422) {
 
                             // http 状态码为 422 代表用户输入校验失败
